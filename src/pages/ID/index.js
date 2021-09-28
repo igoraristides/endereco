@@ -9,26 +9,45 @@ import Button from "../../components/Button";
 import Form from "../../components/Form";
 import Input from "../../components/Input";
 import { Card, Title, Text, Content, Subtitle, TitlePage } from "./styles";
+import api from "../../services/api";
+import { toast } from "react-toastify";
+import Loader from "react-loader-spinner";
 
 const PorId = () => {
   const formRef = useRef(null);
   const history = useHistory();
+  const [loading, setLoading] = useState(false);
+  const [end, setEnd] = useState({});
 
-  const goTo = (e) => {};
+  const handleSubmit = async (formData) => {
+    try {
+      setLoading(true);
+
+      const ceps = await api.post("/endereco", formData);
+      setEnd(ceps)
+      toast.success("Endereço Encontrado..");
+
+
+    } catch (error) {
+      toast.error("Verifique o CEP informado.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
       <TitlePage>Buscar Endereço por ID</TitlePage>
-      <Form ref={formRef}>
+      <Form ref={formRef} onSubmit={handleSubmit}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={6}>
-            <Input name="name" placeholder="" label="Digite o ID: " />
+            <Input name="id" placeholder="" label="Digite o ID: " />
           </Grid>
           <Grid item xs={12} sm={12} md={6}>
             <Content>
               <Button
                 color="primary"
-                type="button"
+                type="submit"
                 size="large"
                 height={50}
                 label="Buscar por Cidade"
@@ -40,41 +59,33 @@ const PorId = () => {
           </Grid>
         </Grid>
       </Form>
-      <Card>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Subtitle>Endereço com ID 1234</Subtitle>
+      {end ? (
+        <Loader type="Bars" color="#A8D497" height={50} width={50} />
+      ) : (
+        <Card>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Subtitle>Endereço</Subtitle>
+            </Grid>
+            <Grid item xs={4}>
+              <Title>Rua</Title>
+              <Text>{end.nome_tipo_logradouro}{end.nome_logradouro}</Text>
+            </Grid>
+            <Grid item xs={4}>
+              <Title>Bairro</Title>
+              <Text>{end.bairro}</Text>
+            </Grid>
+            <Grid item xs={4}>
+              <Title>Cidade</Title>
+              <Text>{end.cidade}</Text>
+            </Grid>
+            <Grid item xs={4}>
+              <Title>UF</Title>
+              <Text>{end.estado}</Text>
+            </Grid>
           </Grid>
-          <Grid item xs={4}>
-            <Title>CEP</Title>
-            <Text>123456</Text>
-          </Grid>
-          <Grid item xs={4}>
-            <Title>Rua</Title>
-            <Text>aaaaaaaaaaa</Text>
-          </Grid>
-          <Grid item xs={4}>
-            <Title>Número</Title>
-            <Text>aaaaaaaaaaa</Text>
-          </Grid>
-          <Grid item xs={4}>
-            <Title>Bairro</Title>
-            <Text>aaaaaaaaaaa</Text>
-          </Grid>
-          <Grid item xs={4}>
-            <Title>Cidade</Title>
-            <Text>aaaaaaaaaaa</Text>
-          </Grid>
-          <Grid item xs={4}>
-            <Title>UF</Title>
-            <Text>aaaaaaaaaaa</Text>
-          </Grid>
-          <Grid item xs={12}>
-            <Title>Complemento</Title>
-            <Text>aaaaaaaaaaa</Text>
-          </Grid>
-        </Grid>
-      </Card>
+        </Card>
+      )}
     </>
   );
 };
